@@ -1,5 +1,5 @@
 cell_size = 50
-cell_number = 10
+cell_number = 6
 snake_amount = 500
 starting_moves = 50
 look_size = 3

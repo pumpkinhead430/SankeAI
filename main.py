@@ -1,3 +1,5 @@
+# this branch is the main branch - normal neural network
+
 import pygame
 from pygame.math import Vector2
 import numpy as np
@@ -5,7 +7,6 @@ from Fruit import Fruit
 import copy
 import time
 import random
-import tensorflow as tf
 from Snake import Snake
 from CONSTANTS import *
 
@@ -68,7 +69,7 @@ class Game:
         if self.best >= 3:
             print('help')
             self.snakes[1].brain.copy(self.best_snake.brain)
-            self.snakes[1].brain.mutate(mutation_rate)
+            self.snakes[1].brain.mutate(mutation_rate / 5)
             self.best = 0
 
         new_snakes = []
@@ -87,7 +88,7 @@ class Game:
             cross_snake2 = Snake(self.window)
             cross_snake1.brain, cross_snake2.brain = self.snakes[i].brain.crossover(self.snakes[i + 1].brain)
             new_snakes.extend([cross_snake1, cross_snake2])
-        #help
+
         for i in range(len(new_snakes)):
             new_snake = Snake(self.window)
             new_snake.brain.copy(new_snakes[i].brain)

@@ -21,12 +21,11 @@ class Fruit:
         # self.pos = Vector2(cell_size * random.randint(0, cell_number - 1), cell_size * random.randint(0, cell_number - 1))
         '''
         if place:
-            self.pos = Vector2(3 * cell_size, 10 * cell_size)
+            self.pos = Vector2(3 * cell_size, 5 * cell_size)
         else:
-            self.pos = Vector2(10 * cell_size, 3 * cell_size)
+            self.pos = Vector2(5 * cell_size, 3 * cell_size)
         '''
         self.win = win
-
 
     def draw_fruit(self):
         fruit_rect = pygame.Rect(int(self.pos.x), int(self.pos.y), cell_size, cell_size)
@@ -35,4 +34,3 @@ class Fruit:
     def make_position(self, snake_body):
         free_pos = all_clear_positions(snake_body)
         self.pos = free_pos[random.randint(0, len(free_pos))]
-
