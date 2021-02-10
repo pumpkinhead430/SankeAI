@@ -1,0 +1,12 @@
+cell_size = 50
+cell_number = 10
+snake_amount = 500
+starting_moves = 50
+look_size = 3
+mutation_rate = 5
+risk_rate = 10
+FPS = 60
+Green = (0, 255, 0)
+Red = (255, 0, 0)
+Black = (0, 0, 0)
+White = (255, 255, 255)
