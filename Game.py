@@ -13,13 +13,14 @@ class Game:
         self.window = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number))
         self.clock = pygame.time.Clock()
         self.score = 0
+        self.game_over = False
         self.run = True
         self.snake = Snake(self.window)
         self.fruit = Fruit(self.window, self.snake.body)
 
     def reset(self):
         self.score = 0
-        self.run = True
+        self.game_over = False
         self.snake = Snake(self.window)
         self.fruit = Fruit(self.window, self.snake.body)
 
@@ -38,12 +39,21 @@ class Game:
 
         self.snake.change_by_action(action)
         self.snake.update_snake(self.fruit.pos)
+        reward = 0
+
+        if self.snake.dead():
+            self.game_over = True
+            reward = -10
+            return reward, self.game_over, self.score
 
         if self.snake.head == self.fruit.pos:
             self.fruit = Fruit(self.window, self.snake.body)
+            reward = 10
+            return reward, self.game_over, self.score
 
-        if self.snake.dead():
-            self.reset()
+        return reward, self.game_over, self.score
+
+
 
     def draw(self):
         self.window.fill(Black)

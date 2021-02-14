@@ -6,9 +6,11 @@ from Game import Game
 def main():
     game = Game()
     while game.is_running():
-        game.update()
+        reward, game_over, score = game.update()
         game.draw()
         game.delay()
+        if game_over:
+            game.reset()
 
 
 if __name__ == '__main__':
