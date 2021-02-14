@@ -1,14 +1,9 @@
 # this branch is the main branch - normal neural network
 
 import pygame
-from pygame.math import Vector2
-import numpy as np
-from Fruit import Fruit
-import copy
-import time
-import random
-from Snake import Snake
+
 from CONSTANTS import *
+from Snake import Snake
 
 
 class Game:
