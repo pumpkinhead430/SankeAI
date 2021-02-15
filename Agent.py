@@ -5,12 +5,12 @@ from collections import deque
 from Game import Game
 import pygame
 from pygame import Vector2
-from CONSTANTS import cell_size, straight, turn_right, turn_left
+from CONSTANTS import cell_size, cell_number
 from model import linearQnet, QTrainer
 import math
 import time
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
+MAX_MEMORY = 100_000_000
+BATCH_SIZE = 10000
 LR = 0.001
 movement_dict = {pygame.K_RIGHT: Vector2(cell_size, 0),
                  pygame.K_LEFT: Vector2(-cell_size, 0),
@@ -24,13 +24,13 @@ class Agent:
         self.epsilon = 40  # randomness
         self.gamma = 0.9  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = linearQnet(11, 256, 3)
+        self.model = linearQnet((cell_number + 1) * (cell_number + 1), 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     @staticmethod
     def get_state(game):
         head = game.snake.head
-
+        '''
         state = [
             game.snake.dead(head + game.snake.real_dir),  # check if danger straight
             game.snake.dead(head + game.snake.real_dir.rotate(90)),  # check if danger right
@@ -47,8 +47,10 @@ class Agent:
             game.fruit.pos.y > game.snake.head.y,
 
         ]
-
-        return np.array(state, dtype=int)
+        '''
+        state = game.board.flatten()
+        print(state)
+        return np.array(state)
 
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append((state, action, reward, next_state, game_over))
@@ -98,9 +100,7 @@ def train():
         if game_over:
             game.reset()
             agent.n_games += 1
-            t0 = time.time()
             agent.train_long_memory()
-            print("time passed:", time.time() - t0)
             if record < score:
                 record = score
             print(f'Game: {agent.n_games}\nScore: {score}\n record: {record}')
