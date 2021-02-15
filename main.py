@@ -1,4 +1,4 @@
-# this branch is the Q learning  branch - normal neural network
+# this branch is the Q learning  branch - changing states available
 
 from Game import Game
 
