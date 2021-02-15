@@ -54,14 +54,24 @@ class Snake:
     def check_direction(self, direction):
         return direction + self.real_dir != Vector2(0, 0)
 
-    def dead(self):
-        if self.snake_out_of_bounds(self.head):
+    def dead(self, pos=None):
+        if pos:
+            head = pos
+        else:
+            head = self.head
+        if self.snake_out_of_bounds(head):
             return True
 
         for point in self.body[1:]:
-            if self.head == point:
+            if head == point:
                 return True
 
+        return False
+
+    def snake_inside(self, pos):
+        for point in self.body[1:]:
+            if pos == point:
+                return True
         return False
 
     @staticmethod

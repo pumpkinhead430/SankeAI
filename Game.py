@@ -9,7 +9,7 @@ class Game:
         pygame.init()
         pygame.display.set_caption("Snake")
         self.fps = FPS
-        self.frames_left = starting_moves
+        self.frame_iteration = 0
         self.window = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number))
         self.clock = pygame.time.Clock()
         self.score = 0
@@ -23,6 +23,7 @@ class Game:
         self.game_over = False
         self.snake = Snake(self.window)
         self.fruit = Fruit(self.window, self.snake.body)
+        self.frame_iteration = 0
 
     def update(self, action=straight):
         for event in pygame.event.get():
@@ -37,13 +38,22 @@ class Game:
                     self.fps = self.fps / 2
                     print(self.fps)
 
+        self.frame_iteration += 1
         self.snake.change_by_action(action)
+        current_length = len(self.snake.body)
         self.snake.update_snake(self.fruit.pos)
+        if len(self.snake.body) > current_length:
+            self.score += 1
         reward = 0
 
-        if self.snake.dead():
+        if self.frame_iteration > move_amount * len(self.snake.body):
+            self.snake.is_dead = True
+
+        if self.snake.is_dead:
             self.game_over = True
             reward = -10
+            if self.snake.snake_inside(self.snake.head):
+                reward -= 10
             return reward, self.game_over, self.score
 
         if self.snake.head == self.fruit.pos:
@@ -52,8 +62,6 @@ class Game:
             return reward, self.game_over, self.score
 
         return reward, self.game_over, self.score
-
-
 
     def draw(self):
         self.window.fill(Black)
