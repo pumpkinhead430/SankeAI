@@ -5,10 +5,11 @@ from collections import deque
 from Game import Game
 import pygame
 from pygame import Vector2
-from CONSTANTS import cell_size, straight, turn_right, turn_left
+from CONSTANTS import cell_size, look_size
 from model import linearQnet, QTrainer
 import math
 import time
+
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
@@ -30,6 +31,21 @@ class Agent:
     @staticmethod
     def get_state(game):
         head = game.snake.head
+        '''
+        state = np.zeros((look_size, look_size))
+        
+        state[int(look_size / 2)][int(look_size / 2)] = - 1
+        for i in range(state.shape[0]):
+            physical_y = i * cell_size + head.y - int(look_size / 2) * cell_size
+            for j in range(state.shape[1]):
+                physical_x = j * cell_size + head.x - int(look_size / 2) * cell_size
+                physical_pos = Vector2(physical_x, physical_y)
+                if physical_pos == game.fruit.pos:
+                    state[i][j] = 1
+                elif game.snake.snake_out_of_bounds(physical_pos) or game.snake.snake_inside(physical_pos):
+                    state[i][j] = -1
+
+        '''
 
         state = [
             game.snake.dead(head + game.snake.real_dir),  # check if danger straight
@@ -47,7 +63,10 @@ class Agent:
             game.fruit.pos.y > game.snake.head.y,
 
         ]
-
+        '''
+        state = state.flatten()
+        state = np.append(state, [(head.x - game.fruit.pos.x) / cell_size, (head.x - game.fruit.pos.y) / cell_size])
+        '''
         return np.array(state, dtype=int)
 
     def remember(self, state, action, reward, next_state, game_over):
@@ -65,9 +84,10 @@ class Agent:
         self.trainer.train_step(state, action, reward, next_state, game_over)
 
     def get_action(self, state):
-        self.epsilon = 100 / math.pow(1.01, self.n_games - 5)
+        # self.epsilon = 100 / math.pow(1.01, self.n_games - 5)
+        self.epsilon = 80 - self.n_games
         action = [0, 0, 0]
-        if random.uniform(0, 100) < self.epsilon:
+        if random.uniform(0, 200) < self.epsilon:
             move = random.randint(0, 2)
             action[move] = 1
         else:

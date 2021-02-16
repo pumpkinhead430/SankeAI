@@ -18,7 +18,8 @@ class Snake:
     def __init__(self, win):
         self.head = Vector2(cell_size * cell_number / 2, cell_size * cell_number / 2)
 
-        self.body = [Vector2(self.head), self.head - Vector2(cell_size, self.head.y)]
+        self.body = [Vector2(self.head), self.head - Vector2(cell_size, 0),
+                     self.head - Vector2(2 * cell_size, 0)]
 
         self.is_dead = False
         self.win = win
