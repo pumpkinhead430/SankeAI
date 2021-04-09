@@ -10,9 +10,9 @@ from model import linearQnet, QTrainer
 import math
 import time
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
-LR = 0.001
+MAX_MEMORY = 1000
+BATCH_SIZE = 500
+LR = 0.002
 movement_dict = {pygame.K_RIGHT: Vector2(cell_size, 0),
                  pygame.K_LEFT: Vector2(-cell_size, 0),
                  pygame.K_DOWN: Vector2(0, cell_size),
@@ -22,16 +22,16 @@ movement_dict = {pygame.K_RIGHT: Vector2(cell_size, 0),
 class Agent:
     def __init__(self):
         self.n_games = 1
-        self.epsilon = 40  # randomness
-        self.gamma = 0.9  # discount rate
+        self.epsilon = 25  # randomness
+        self.gamma = 0.6  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = linearQnet(11, 256, 3)
+        self.model = linearQnet(21, 36, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     @staticmethod
     def get_state(game):
         head = game.snake.head
-        '''
+
         vision = np.zeros(21)
         i = 0
         directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)] # left, down-left, down...
@@ -50,7 +50,7 @@ class Agent:
                         vision[i + 2] = (cur_pos.distance_to(head) / cell_size)
             i = i + 3
         return vision
-        '''
+
         '''
         state = np.zeros((look_size, look_size))
 
@@ -74,6 +74,7 @@ class Agent:
 
         return np.asarray(state)
         '''
+        '''
         state = [
             game.snake.dead(head + game.snake.real_dir),  # check if danger straight
             game.snake.dead(head + game.snake.real_dir.rotate(90)),  # check if danger right
@@ -90,6 +91,7 @@ class Agent:
             game.fruit.pos.y > game.snake.head.y,
 
         ]
+        '''
 
         return np.array(state, dtype='int')
 
