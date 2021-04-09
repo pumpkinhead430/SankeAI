@@ -8,6 +8,7 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Snake")
+
         self.fps = FPS
         self.frame_iteration = 0
         self.window = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number))
@@ -17,12 +18,14 @@ class Game:
         self.run = True
         self.snake = Snake(self.window)
         self.fruit = Fruit(self.window, self.snake.body)
+        self.previous_dist = self.snake.head.distance_to(self.fruit.pos)
 
     def reset(self):
         self.score = 0
         self.game_over = False
         self.snake = Snake(self.window)
         self.fruit = Fruit(self.window, self.snake.body)
+        self.previous_dist = self.snake.head.distance_to(self.fruit.pos)
         self.frame_iteration = 0
 
     def update(self, action=straight):
@@ -45,20 +48,30 @@ class Game:
         if len(self.snake.body) > current_length:
             self.score += 1
         reward = 0
+        distance = self.snake.head.distance_to(self.fruit.pos)
 
         if self.frame_iteration > move_amount * len(self.snake.body):
             self.snake.is_dead = True
 
         if self.snake.is_dead:
             self.game_over = True
-            reward = -10
-            if self.snake.snake_inside(self.snake.head):
-                reward -= 10
+            reward = -100
             return reward, self.game_over, self.score
 
         if self.snake.head == self.fruit.pos:
             self.fruit = Fruit(self.window, self.snake.body)
-            reward = 10
+            self.previous_dist = self.snake.head.distance_to(self.fruit.pos)
+            reward = 50
+            return reward, self.game_over, self.score
+
+        if self.previous_dist < distance:
+            reward = -1
+            self.previous_dist = distance
+            return reward, self.game_over, self.score
+
+        if self.previous_dist > distance:
+            reward = 1
+            self.previous_dist = distance
             return reward, self.game_over, self.score
 
         return reward, self.game_over, self.score

@@ -5,7 +5,7 @@ from collections import deque
 from Game import Game
 import pygame
 from pygame import Vector2
-from CONSTANTS import cell_size, look_size
+from CONSTANTS import cell_size, look_size, move_amount
 from model import linearQnet, QTrainer
 import math
 import time
@@ -32,9 +32,29 @@ class Agent:
     def get_state(game):
         head = game.snake.head
         '''
+        vision = np.zeros(21)
+        i = 0
+        directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)] # left, down-left, down...
+        for direction in directions:
+            direction = Vector2(direction[0], direction[1]) * cell_size
+            cur_pos = Vector2(head.x, head.y)
+
+            if direction != game.snake.real_dir.rotate(180):
+                while not vision[i]:
+                    cur_pos += direction
+                    if game.snake.snake_out_of_bounds(cur_pos):
+                        vision[i] = (cur_pos.distance_to(head) / cell_size)
+                    if cur_pos in game.snake.body:
+                        vision[i + 1] = (cur_pos.distance_to(head) / cell_size)
+                    if cur_pos == game.fruit.pos:
+                        vision[i + 2] = (cur_pos.distance_to(head) / cell_size)
+            i = i + 3
+        return vision
+        '''
+        '''
         state = np.zeros((look_size, look_size))
-        
-        state[int(look_size / 2)][int(look_size / 2)] = - 1
+
+        state[int(look_size / 2)][int(look_size / 2)] = 2
         for i in range(state.shape[0]):
             physical_y = i * cell_size + head.y - int(look_size / 2) * cell_size
             for j in range(state.shape[1]):
@@ -42,11 +62,18 @@ class Agent:
                 physical_pos = Vector2(physical_x, physical_y)
                 if physical_pos == game.fruit.pos:
                     state[i][j] = 1
-                elif game.snake.snake_out_of_bounds(physical_pos) or game.snake.snake_inside(physical_pos):
+                elif game.snake.snake_out_of_bounds(physical_pos):
                     state[i][j] = -1
+                elif game.snake.snake_inside(physical_pos):
+                    state[i][j] = -1
+        life_left = max(move_amount * len(game.snake.body) - game.frame_iteration, 1)
 
+        state = state.flatten()
+        state = np.append(state, [1 / head.distance_to(game.fruit.pos),
+                                  1 / life_left])
+
+        return np.asarray(state)
         '''
-
         state = [
             game.snake.dead(head + game.snake.real_dir),  # check if danger straight
             game.snake.dead(head + game.snake.real_dir.rotate(90)),  # check if danger right
@@ -63,11 +90,9 @@ class Agent:
             game.fruit.pos.y > game.snake.head.y,
 
         ]
-        '''
-        state = state.flatten()
-        state = np.append(state, [(head.x - game.fruit.pos.x) / cell_size, (head.x - game.fruit.pos.y) / cell_size])
-        '''
-        return np.array(state, dtype=int)
+
+        return np.array(state, dtype='int')
+
 
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append((state, action, reward, next_state, game_over))
@@ -84,10 +109,11 @@ class Agent:
         self.trainer.train_step(state, action, reward, next_state, game_over)
 
     def get_action(self, state):
-        # self.epsilon = 100 / math.pow(1.01, self.n_games - 5)
+        # self.epsilon = 100 / math.pow(1.01, self.n_games - 1)
         self.epsilon = 80 - self.n_games
+        # self.epsilon -= 1 / 200
         action = [0, 0, 0]
-        if random.uniform(0, 200) < self.epsilon:
+        if random.uniform(0, 100) < self.epsilon:
             move = random.randint(0, 2)
             action[move] = 1
         else:
