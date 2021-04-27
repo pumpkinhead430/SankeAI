@@ -66,11 +66,10 @@ class Agent:
                     state[i][j] = -1
                 elif game.snake.snake_inside(physical_pos):
                     state[i][j] = -1
-        life_left = max(move_amount * len(game.snake.body) - game.frame_iteration, 1)
 
         state = state.flatten()
-        state = np.append(state, [head.x - game.fruit.pos.x, head.y - game.fruit.pos.y])
-
+        state = np.append(state, [(head.x - game.fruit.pos.x) / cell_size, (head.y - game.fruit.pos.y) / cell_size])
+        print((game.fruit.pos.x - head.x) / cell_size, (game.fruit.pos.y - head.y) / cell_size)
         return np.asarray(state)
         '''
         state = [
