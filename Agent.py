@@ -25,7 +25,7 @@ class Agent:
         self.epsilon = 40  # randomness
         self.gamma = 0.6  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = linearQnet(11, 256, 3)
+        self.model = linearQnet(83, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     @staticmethod
@@ -51,7 +51,7 @@ class Agent:
             i = i + 3
         return vision
         '''
-        '''
+
         state = np.zeros((look_size, look_size))
 
         state[int(look_size / 2)][int(look_size / 2)] = 2
@@ -69,8 +69,7 @@ class Agent:
         life_left = max(move_amount * len(game.snake.body) - game.frame_iteration, 1)
 
         state = state.flatten()
-        state = np.append(state, [1 / head.distance_to(game.fruit.pos),
-                                  1 / life_left])
+        state = np.append(state, [head.x - game.fruit.pos.x, head.y - game.fruit.pos.y])
 
         return np.asarray(state)
         '''
@@ -92,7 +91,7 @@ class Agent:
         ]
 
         return np.array(state, dtype='int')
-
+        '''
 
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append((state, action, reward, next_state, game_over))
@@ -109,8 +108,10 @@ class Agent:
         self.trainer.train_step(state, action, reward, next_state, game_over)
 
     def get_action(self, state):
-        # self.epsilon = 100 / math.pow(1.01, self.n_games - 1)
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 100 / math.pow(1.001, self.n_games - 1)
+        #self.epsilon = 80 - self.n_games
+        self.epsilon = max(5, self.epsilon)
+
         # self.epsilon -= 1 / 200
         action = [0, 0, 0]
         if random.uniform(0, 100) < self.epsilon:
