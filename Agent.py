@@ -11,8 +11,8 @@ import math
 import time
 
 MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
-LR = 0.001
+BATCH_SIZE = 500
+LR = 0.002
 movement_dict = {pygame.K_RIGHT: Vector2(cell_size, 0),
                  pygame.K_LEFT: Vector2(-cell_size, 0),
                  pygame.K_DOWN: Vector2(0, cell_size),
@@ -23,7 +23,7 @@ class Agent:
     def __init__(self):
         self.n_games = 1
         self.epsilon = 40  # randomness
-        self.gamma = 0.9  # discount rate
+        self.gamma = 0.6  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
         self.model = linearQnet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -138,8 +138,8 @@ def train():
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, action, reward, state_new, game_over)
         agent.remember(state_old, action, reward, state_new, game_over)
-
-        game.draw()
+        if not game_over:
+            game.draw()
         game.delay()
         if game_over:
             game.reset()

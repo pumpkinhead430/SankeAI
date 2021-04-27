@@ -28,16 +28,14 @@ class Snake:
 
     def draw_snake(self):
         block_rect = pygame.Rect(int(self.body[0].x), int(self.body[0].y), cell_size, cell_size)
-
-        for block in self.body:
+        pygame.draw.rect(self.win, Blue, block_rect)
+        for block in [x for x in self.body if x != self.body[0]]:
             block_rect.x = block.x
             block_rect.y = block.y
             pygame.draw.rect(self.win, Red, block_rect)
 
     def update_snake(self, food_pos):
-        if self.dead():
-            self.is_dead = True
-            return -1
+
         if self.check_direction(self.dir):
             self.real_dir = self.dir
 
@@ -45,6 +43,10 @@ class Snake:
         self.body.insert(0, Vector2(self.head))
         if food_pos != self.head:
             self.body.pop()
+
+        if self.dead():
+            self.is_dead = True
+            return -1
         return 0
 
     def change_direction(self, key):
