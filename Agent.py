@@ -148,6 +148,7 @@ def train():
             t0 = time.time()
             agent.train_long_memory()
             print("time passed:", time.time() - t0)
+            print('epsilon:', agent.epsilon)
             if record < score:
                 record = score
             print(f'Game: {agent.n_games}\nScore: {score}\n record: {record}')
