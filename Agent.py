@@ -22,6 +22,7 @@ movement_dict = {pygame.K_RIGHT: Vector2(cell_size, 0),
 class Agent:
     def __init__(self):
         self.n_games = 1
+        self.is_random = True
         self.epsilon = 40  # randomness
         self.gamma = 0.6  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
@@ -112,7 +113,8 @@ class Agent:
 
         # self.epsilon -= 1 / 200
         action = [0, 0, 0]
-        if random.uniform(0, 100) < self.epsilon:
+
+        if self.is_random and random.uniform(0, 100) < self.epsilon:
             move = random.randint(0, 2)
             action[move] = 1
         else:
@@ -133,7 +135,8 @@ def train():
         state_old = agent.get_state(game)
 
         action = agent.get_action(state_old)
-        reward, game_over, score = game.update(action)
+        reward, game_over, score = game.update(agent, action)
+
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, action, reward, state_new, game_over)
         agent.remember(state_old, action, reward, state_new, game_over)

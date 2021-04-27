@@ -4,6 +4,14 @@ from Snake import Snake
 from Fruit import Fruit
 
 
+def change_random(agent):
+    agent.is_random = not agent.is_random
+    if agent.is_random:
+        print('random is now turned on')
+    else:
+        print('random is now turned off')
+
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -28,7 +36,7 @@ class Game:
         self.previous_dist = self.snake.head.distance_to(self.fruit.pos)
         self.frame_iteration = 0
 
-    def update(self, action=straight):
+    def update(self, agent, action=straight):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.run = False
@@ -40,6 +48,8 @@ class Game:
                 if event.key == pygame.K_s:
                     self.fps = self.fps / 2
                     print(self.fps)
+                if event.key == pygame.K_q:
+                    change_random(agent)
 
         self.frame_iteration += 1
         self.snake.change_by_action(action)
