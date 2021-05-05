@@ -1,13 +1,24 @@
-import math
-import pygame
+import matplotlib.pyplot as plt
+
 import numpy as np
-import time
 
+def makeFig():
+    plt.scatter(xList,yList) # I think you meant this
 
-def sigmoid(inputs):
-    return [1 / (1 + math.exp(-x)) for x in inputs]
+plt.ion() # enable interactivity
+fig=plt.figure() # make a figure
 
-vect1 = pygame.Vector2(1, 0)
-vect2 = vect1
-vect2 *= 6
-print(vect1)
+xList=list()
+yList=list()
+
+for i in np.arange(50):
+    y=np.random.random()
+    xList.append(i)
+    yList.append(y)
+    makeFig()
+    plt.draw()
+    #makeFig()      The drawnow(makeFig) command can be replaced
+    #plt.draw()     with makeFig(); plt.draw()
+    plt.pause(0.001)
+    for i in range(100000):
+        print(1)

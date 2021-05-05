@@ -23,6 +23,8 @@ class Game:
         self.clock = pygame.time.Clock()
         self.score = 0
         self.game_over = False
+        self.font = pygame.font.SysFont('arial', 30, True, False)
+        self.scoreText = self.font.render(str(self.score), False, White, Black)
         self.run = True
         self.snake = Snake(self.window)
         self.fruit = Fruit(self.window, self.snake.body)
@@ -35,6 +37,7 @@ class Game:
         self.fruit = Fruit(self.window, self.snake.body)
         self.previous_dist = self.snake.head.distance_to(self.fruit.pos)
         self.frame_iteration = 0
+        self.scoreText = self.font.render(str(self.score), True, White)
 
     def update(self, agent, action=straight):
         for event in pygame.event.get():
@@ -57,6 +60,7 @@ class Game:
         self.snake.update_snake(self.fruit.pos)
         if len(self.snake.body) > current_length:
             self.score += 1
+            self.scoreText = self.font.render(str(self.score), True, White)
         reward = 0
         distance = self.snake.head.distance_to(self.fruit.pos)
 
@@ -90,6 +94,7 @@ class Game:
         self.window.fill(Black)
         self.fruit.draw_fruit()
         self.snake.draw_snake()
+        self.draw_score()
         pygame.display.update()
 
     def delay(self):
@@ -101,3 +106,6 @@ class Game:
 
     def is_running(self):
         return self.run
+
+    def draw_score(self):
+        self.window.blit(self.scoreText, self.scoreText.get_rect())

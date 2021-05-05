@@ -27,12 +27,16 @@ class Snake:
         self.real_dir = self.dir
 
     def draw_snake(self):
+        inner_block = pygame.Rect(int(self.body[0].x), int(self.body[0].y), cell_size - 10, cell_size - 10)
         block_rect = pygame.Rect(int(self.body[0].x), int(self.body[0].y), cell_size, cell_size)
         pygame.draw.rect(self.win, Blue, block_rect)
         for block in [x for x in self.body if x != self.body[0]]:
             block_rect.x = block.x
             block_rect.y = block.y
             pygame.draw.rect(self.win, Red, block_rect)
+            inner_block.x = block.x + 5
+            inner_block.y = block.y + 5
+            pygame.draw.rect(self.win, light_red, inner_block)
 
     def update_snake(self, food_pos):
 

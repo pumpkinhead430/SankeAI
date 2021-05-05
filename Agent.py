@@ -7,7 +7,8 @@ import pygame
 from pygame import Vector2
 from CONSTANTS import cell_size, look_size, move_amount
 from model import linearQnet, QTrainer
-import math
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import time
 
 MAX_MEMORY = 100_000
@@ -26,7 +27,7 @@ class Agent:
         self.epsilon = 40  # randomness
         self.gamma = 0.6  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = linearQnet(83, 64, 3)
+        self.model = linearQnet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     @staticmethod
@@ -52,7 +53,7 @@ class Agent:
             i = i + 3
         return vision
         '''
-
+        '''
         state = np.zeros((look_size, look_size))
 
         state[int(look_size / 2)][int(look_size / 2)] = 2
@@ -90,7 +91,7 @@ class Agent:
         ]
 
         return np.array(state, dtype='int')
-        '''
+
 
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append((state, action, reward, next_state, game_over))
@@ -107,9 +108,9 @@ class Agent:
         self.trainer.train_step(state, action, reward, next_state, game_over)
 
     def get_action(self, state):
-        self.epsilon = 100 / math.pow(1.001, self.n_games - 1)
-        #self.epsilon = 80 - self.n_games
-        self.epsilon = max(5, self.epsilon)
+        # self.epsilon = 100 / math.pow(1.001, self.n_games - 1)
+        self.epsilon = 80 - self.n_games
+        # self.epsilon = max(5, self.epsilon)
 
         # self.epsilon -= 1 / 200
         action = [0, 0, 0]
@@ -126,7 +127,12 @@ class Agent:
 
 
 def train():
-    plot_mean_score = []
+    plot_scores = []
+    plot_mean_scores = []
+    plot_games = []
+    total_reward = 0
+    plot_rewards = []
+    total_score = 0
     record = 0
     agent = Agent()
     game = Game()
@@ -136,7 +142,7 @@ def train():
 
         action = agent.get_action(state_old)
         reward, game_over, score = game.update(agent, action)
-
+        total_reward += reward
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, action, reward, state_new, game_over)
         agent.remember(state_old, action, reward, state_new, game_over)
@@ -153,6 +159,20 @@ def train():
             if record < score:
                 record = score
             print(f'Game: {agent.n_games}\nScore: {score}\n record: {record}')
+            plot_games.append(agent.n_games)
+            plot_scores.append(score)
+            plot_rewards.append(total_reward / 1000)
+            total_reward = 0
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
+            plt.cla()
+            plt.plot(plot_games, plot_rewards, label="rewards")
+            plt.plot(plot_games, plot_scores, label="scores")
+            plt.plot(plot_games, plot_mean_scores, label="average scores")
+            plt.legend()
+            plt.draw()
+            plt.pause(0.001)
 
 
 if __name__ == '__main__':

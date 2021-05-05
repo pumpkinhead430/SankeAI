@@ -9,12 +9,10 @@ class linearQnet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
         self.hidden1 = nn.Linear(input_size, hidden_size)
-        self.hidden2 = nn.Linear(hidden_size, hidden_size)
         self.output_layer = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
         x = F.relu(self.hidden1(x))
-        x = F.relu(self.hidden2(x))
         x = self.output_layer(x)
         return x
 
