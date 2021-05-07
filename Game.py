@@ -2,6 +2,7 @@ import pygame
 from CONSTANTS import *
 from Snake import Snake
 from Fruit import Fruit
+from Mode import Mode
 
 
 def change_random(agent):
@@ -13,11 +14,12 @@ def change_random(agent):
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, mode):
         pygame.init()
         pygame.display.set_caption("Snake")
 
         self.fps = FPS
+        self.mode = mode
         self.frame_iteration = 0
         self.window = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number))
         self.clock = pygame.time.Clock()
@@ -39,7 +41,7 @@ class Game:
         self.frame_iteration = 0
         self.scoreText = self.font.render(str(self.score), True, White)
 
-    def update(self, agent, action=straight):
+    def update(self, action=straight, agent=None):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.run = False
@@ -51,11 +53,13 @@ class Game:
                 if event.key == pygame.K_s:
                     self.fps = self.fps / 2
                     print(self.fps)
-                if event.key == pygame.K_q:
-                    change_random(agent)
+                if self.mode is Mode.TRAIN:
+                    if event.key == pygame.K_q:
+                        change_random(agent)
 
         self.frame_iteration += 1
-        self.snake.change_by_action(action)
+        if self.mode is not Mode.HUMAN:
+            self.snake.change_by_action(action)
         current_length = len(self.snake.body)
         self.snake.update_snake(self.fruit.pos)
         if len(self.snake.body) > current_length:

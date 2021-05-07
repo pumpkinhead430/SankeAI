@@ -1,10 +1,8 @@
-# this branch is the Q learning  branch - changing states available
-
 from Game import Game
 from Mode import Mode
 
 
-def main():
+def human():
     game = Game(Mode.HUMAN)
     while game.is_running():
         reward, game_over, score = game.update()
@@ -15,4 +13,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    human()

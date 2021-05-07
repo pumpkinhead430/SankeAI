@@ -6,6 +6,7 @@ from Game import Game
 import pygame
 from pygame import Vector2
 from CONSTANTS import cell_size, look_size, move_amount
+from Mode import Mode
 from model import linearQnet, QTrainer
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -92,7 +93,6 @@ class Agent:
 
         return np.array(state, dtype='int')
 
-
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append((state, action, reward, next_state, game_over))
 
@@ -126,6 +126,16 @@ class Agent:
         return action
 
 
+def plot_game_status(plot_games, plot_rewards, plot_scores, plot_mean_scores):
+    plt.cla()
+    plt.plot(plot_games, plot_rewards, label="rewards")
+    plt.plot(plot_games, plot_scores, label="scores")
+    plt.plot(plot_games, plot_mean_scores, label="average scores")
+    plt.legend()
+    plt.draw()
+    plt.pause(0.001)
+
+
 def train():
     plot_scores = []
     plot_mean_scores = []
@@ -135,13 +145,13 @@ def train():
     total_score = 0
     record = 0
     agent = Agent()
-    game = Game()
+    game = Game(Mode.TRAIN)
     while game.is_running():
 
         state_old = agent.get_state(game)
 
         action = agent.get_action(state_old)
-        reward, game_over, score = game.update(agent, action)
+        reward, game_over, score = game.update(action, agent)
         total_reward += reward
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, action, reward, state_new, game_over)
@@ -154,11 +164,13 @@ def train():
             agent.n_games += 1
             t0 = time.time()
             agent.train_long_memory()
-            print("time passed:", time.time() - t0)
-            print('epsilon:', agent.epsilon)
             if record < score:
                 record = score
+                
+            print("time passed:", time.time() - t0)
+            print('epsilon:', agent.epsilon)
             print(f'Game: {agent.n_games}\nScore: {score}\n record: {record}')
+
             plot_games.append(agent.n_games)
             plot_scores.append(score)
             plot_rewards.append(total_reward / 1000)
@@ -166,13 +178,7 @@ def train():
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            plt.cla()
-            plt.plot(plot_games, plot_rewards, label="rewards")
-            plt.plot(plot_games, plot_scores, label="scores")
-            plt.plot(plot_games, plot_mean_scores, label="average scores")
-            plt.legend()
-            plt.draw()
-            plt.pause(0.001)
+            plot_game_status(plot_games, plot_rewards, plot_scores, plot_mean_scores)
 
 
 if __name__ == '__main__':
