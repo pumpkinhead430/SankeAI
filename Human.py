@@ -1,12 +1,14 @@
 from Game import Game
 from Mode import Mode
+from CONSTANTS import HUMAN_FPS
 
 
 def human():
-    game = Game(Mode.HUMAN)
+    game = Game(Mode.HUMAN, HUMAN_FPS)
     while game.is_running():
         reward, game_over, score = game.update()
-        game.draw()
+        if not game_over:
+            game.draw()
         game.delay()
         if game_over:
             game.reset()

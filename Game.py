@@ -14,11 +14,11 @@ def change_random(agent):
 
 
 class Game:
-    def __init__(self, mode):
+    def __init__(self, mode, fps):
         pygame.init()
         pygame.display.set_caption("Snake")
 
-        self.fps = FPS
+        self.fps = fps
         self.mode = mode
         self.frame_iteration = 0
         self.window = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number))
@@ -46,7 +46,8 @@ class Game:
             if event.type == pygame.QUIT:
                 self.run = False
             if event.type == pygame.KEYDOWN:
-                self.snake.change_direction(event.key)
+                if self.mode is Mode.HUMAN:
+                    self.snake.change_direction(event.key)
                 if event.key == pygame.K_w:
                     self.fps = self.fps * 2
                     print(self.fps)
@@ -60,6 +61,7 @@ class Game:
         self.frame_iteration += 1
         if self.mode is not Mode.HUMAN:
             self.snake.change_by_action(action)
+
         current_length = len(self.snake.body)
         self.snake.update_snake(self.fruit.pos)
         if len(self.snake.body) > current_length:

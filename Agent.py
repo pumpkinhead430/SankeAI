@@ -4,12 +4,12 @@ import numpy as np
 from collections import deque
 from Game import Game
 import pygame
+import sys
 from pygame import Vector2
-from CONSTANTS import cell_size, look_size, move_amount
+from CONSTANTS import cell_size, AI_FPS
 from Mode import Mode
 from model import linearQnet, QTrainer
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 import time
 
 MAX_MEMORY = 100_000
@@ -22,10 +22,11 @@ movement_dict = {pygame.K_RIGHT: Vector2(cell_size, 0),
 
 
 class Agent:
-    def __init__(self):
+    def __init__(self, decay_rate=80):
         self.n_games = 1
         self.is_random = True
-        self.epsilon = 40  # randomness
+        self.epsilon = 100  # randomness
+        self.decay_rate = 100 / decay_rate
         self.gamma = 0.6  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
         self.model = linearQnet(11, 256, 3)
@@ -34,46 +35,6 @@ class Agent:
     @staticmethod
     def get_state(game):
         head = game.snake.head
-        '''
-        vision = np.zeros(21)
-        i = 0
-        directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)] # left, down-left, down...
-        for direction in directions:
-            direction = Vector2(direction[0], direction[1]) * cell_size
-            cur_pos = Vector2(head.x, head.y)
-
-            if direction != game.snake.real_dir.rotate(180):
-                while not vision[i]:
-                    cur_pos += direction
-                    if game.snake.snake_out_of_bounds(cur_pos):
-                        vision[i] = (cur_pos.distance_to(head) / cell_size)
-                    if cur_pos in game.snake.body:
-                        vision[i + 1] = (cur_pos.distance_to(head) / cell_size)
-                    if cur_pos == game.fruit.pos:
-                        vision[i + 2] = (cur_pos.distance_to(head) / cell_size)
-            i = i + 3
-        return vision
-        '''
-        '''
-        state = np.zeros((look_size, look_size))
-
-        state[int(look_size / 2)][int(look_size / 2)] = 2
-        for i in range(state.shape[0]):
-            physical_y = i * cell_size + head.y - int(look_size / 2) * cell_size
-            for j in range(state.shape[1]):
-                physical_x = j * cell_size + head.x - int(look_size / 2) * cell_size
-                physical_pos = Vector2(physical_x, physical_y)
-                if physical_pos == game.fruit.pos:
-                    state[i][j] = 1
-                elif game.snake.snake_out_of_bounds(physical_pos):
-                    state[i][j] = -1
-                elif game.snake.snake_inside(physical_pos):
-                    state[i][j] = -1
-
-        state = state.flatten()
-        state = np.append(state, [(head.x - game.fruit.pos.x) / cell_size, (head.y - game.fruit.pos.y) / cell_size])
-        return np.asarray(state)
-        '''
         state = [
             game.snake.dead(head + game.snake.real_dir),  # check if danger straight
             game.snake.dead(head + game.snake.real_dir.rotate(90)),  # check if danger right
@@ -108,11 +69,6 @@ class Agent:
         self.trainer.train_step(state, action, reward, next_state, game_over)
 
     def get_action(self, state):
-        # self.epsilon = 100 / math.pow(1.001, self.n_games - 1)
-        self.epsilon = 80 - self.n_games
-        # self.epsilon = max(5, self.epsilon)
-
-        # self.epsilon -= 1 / 200
         action = [0, 0, 0]
 
         if self.is_random and random.uniform(0, 100) < self.epsilon:
@@ -124,6 +80,10 @@ class Agent:
             move = torch.argmax(prediction).item()
             action[move] = 1
         return action
+
+    def update_epsilon(self):
+        self.epsilon -= self.decay_rate
+        self.epsilon = max(self.epsilon, 5)
 
 
 def plot_game_status(plot_games, plot_rewards, plot_scores, plot_mean_scores):
@@ -144,8 +104,15 @@ def train():
     plot_rewards = []
     total_score = 0
     record = 0
-    agent = Agent()
-    game = Game(Mode.TRAIN)
+    if len(sys.argv) > 1:
+        decay_rate = sys.argv[1]
+    else:
+        decay_rate = '80'
+    if decay_rate.isnumeric():
+        agent = Agent(int(decay_rate))
+    else:
+        agent = Agent()
+    game = Game(Mode.TRAIN, AI_FPS)
     while game.is_running():
 
         state_old = agent.get_state(game)
@@ -162,13 +129,14 @@ def train():
         if game_over:
             game.reset()
             agent.n_games += 1
+            agent.update_epsilon()
             t0 = time.time()
             agent.train_long_memory()
             if record < score:
                 record = score
-                
+                agent.model.save('record_model.pth')
             print("time passed:", time.time() - t0)
-            print('epsilon:', agent.epsilon)
+            print("epsilon: {:.2f}".format(agent.epsilon))
             print(f'Game: {agent.n_games}\nScore: {score}\n record: {record}')
 
             plot_games.append(agent.n_games)
@@ -179,7 +147,10 @@ def train():
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot_game_status(plot_games, plot_rewards, plot_scores, plot_mean_scores)
+    agent.model.save('last_model.pth')
 
 
 if __name__ == '__main__':
     train()
+
+
