@@ -68,11 +68,7 @@ class Snake:
         if self.snake_out_of_bounds(head):
             return True
 
-        for point in self.body[1:]:
-            if head == point:
-                return True
-
-        return False
+        return self.snake_inside(head)
 
     def snake_inside(self, pos):
         for point in self.body[1:]:
