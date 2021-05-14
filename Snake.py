@@ -3,7 +3,6 @@ import itertools
 from pygame.math import Vector2
 import numpy as np
 from CONSTANTS import *
-from Brain import Brain
 from Fruit import Fruit
 import time
 

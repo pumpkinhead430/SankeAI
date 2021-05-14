@@ -59,42 +59,42 @@ class Game:
                         change_random(agent)
 
         self.frame_iteration += 1
+
         if self.mode is not Mode.HUMAN:
             self.snake.change_by_action(action)
 
         current_length = len(self.snake.body)
         self.snake.update_snake(self.fruit.pos)
+
         if len(self.snake.body) > current_length:
             self.score += 1
             self.scoreText = self.font.render(str(self.score), True, White)
-        reward = 0
-        distance = self.snake.head.distance_to(self.fruit.pos)
 
         if self.frame_iteration > move_amount * len(self.snake.body):
             self.snake.is_dead = True
 
+        reward = self.get_reward()
+
+        return reward, self.game_over, self.score
+
+    def get_reward(self):
+        distance = self.snake.head.distance_to(self.fruit.pos)
         if self.snake.is_dead:
             self.game_over = True
-            reward = -100
-            return reward, self.game_over, self.score
+            return -100
 
         if self.snake.head == self.fruit.pos:
             self.fruit = Fruit(self.window, self.snake.body)
             self.previous_dist = self.snake.head.distance_to(self.fruit.pos)
-            reward = 50
-            return reward, self.game_over, self.score
+            return 50
 
         if self.previous_dist < distance:
-            reward = -1
             self.previous_dist = distance
-            return reward, self.game_over, self.score
+            return -1
 
         if self.previous_dist > distance:
-            reward = 1
             self.previous_dist = distance
-            return reward, self.game_over, self.score
-
-        return reward, self.game_over, self.score
+            return 1
 
     def draw(self):
         self.window.fill(Black)
