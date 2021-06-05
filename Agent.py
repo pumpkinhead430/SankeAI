@@ -34,20 +34,26 @@ class Agent:
 
     @staticmethod
     def get_state(game):
+        """
+        makes the vision of the snake
+        :param game: the main game
+        :return: the vision of the snake
+        """
         head = game.snake.head
         state = [
             game.snake.dead(head + game.snake.real_dir),  # check if danger straight
             game.snake.dead(head + game.snake.real_dir.rotate(90)),  # check if danger right
             game.snake.dead(head + game.snake.real_dir.rotate(-90)),  # check if danger left
 
+            # -----------------------------------------------------
             game.snake.real_dir == movement_dict[pygame.K_LEFT],
-            game.snake.real_dir == movement_dict[pygame.K_RIGHT],
+            game.snake.real_dir == movement_dict[pygame.K_RIGHT],  # shows the snake witch direction he is in
             game.snake.real_dir == movement_dict[pygame.K_UP],
             game.snake.real_dir == movement_dict[pygame.K_DOWN],
-
+            # ----------------------------------------------------
             game.fruit.pos.x < game.snake.head.x,
             game.fruit.pos.x > game.snake.head.x,
-            game.fruit.pos.y < game.snake.head.y,
+            game.fruit.pos.y < game.snake.head.y,  # shows the snake where the fruit is
             game.fruit.pos.y > game.snake.head.y,
 
         ]
@@ -58,7 +64,7 @@ class Agent:
         self.memory.append((state, action, reward, next_state, game_over))
 
     def train_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
+        if len(self.memory) > BATCH_SIZE:  # if memory is too big, it will chose just a sample from the memory
             mini_sample = random.sample(self.memory, BATCH_SIZE)  # list of tuples
         else:
             mini_sample = self.memory

@@ -1,10 +1,8 @@
-import pygame
-import itertools
-from pygame.math import Vector2
 import numpy as np
+import pygame
+from pygame.math import Vector2
+
 from CONSTANTS import *
-from Fruit import Fruit
-import time
 
 movement_dict = {pygame.K_RIGHT: Vector2(cell_size, 0),
                  pygame.K_LEFT: Vector2(-cell_size, 0),
@@ -22,17 +20,17 @@ class Snake:
 
         self.is_dead = False
         self.win = win
-        self.dir = movement_dict[pygame.K_RIGHT]
-        self.real_dir = self.dir
+        self.dir = movement_dict[pygame.K_RIGHT]  # input of where the snake wants to go
+        self.real_dir = self.dir  # checks if he really go there
 
     def draw_snake(self):
         inner_block = pygame.Rect(int(self.body[0].x), int(self.body[0].y), cell_size - 10, cell_size - 10)
         block_rect = pygame.Rect(int(self.body[0].x), int(self.body[0].y), cell_size, cell_size)
-        pygame.draw.rect(self.win, Blue, block_rect)
+        pygame.draw.rect(self.win, Blue, block_rect)  # drawing head of snake in blue
         for block in [x for x in self.body if x != self.body[0]]:
             block_rect.x = block.x
             block_rect.y = block.y
-            pygame.draw.rect(self.win, Red, block_rect)
+            pygame.draw.rect(self.win, Red, block_rect)  # drawing the rest of the snake in red
             inner_block.x = block.x + 5
             inner_block.y = block.y + 5
             pygame.draw.rect(self.win, light_red, inner_block)
